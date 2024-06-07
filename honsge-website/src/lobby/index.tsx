@@ -13,11 +13,17 @@ function Lobby(){
     const handleLoginInfo = (loginInfo : boolean, customerID : Number) => {
         setCanLogin(loginInfo);
         setCustomerID(customerID);
-        console.log(loginInfo, customerID);
+        setPageState("MainPage");
     }
+    // if (canLogin === true){   
+    //     setPageState("MainPage");
+    //     console.log("I am ", pageState);
+    // }
     return (
         <div>
-            {pageState == "SignUp" ? (<SignUp setPageState={setPageState}/>):(<Login loginInfo={handleLoginInfo} setPageState={setPageState}/>)}
+            {pageState === "SignUp" && <SignUp setPageState={setPageState}/>}
+            {pageState === "MainPage"  && <MainPage customerID={customerID} />}
+            {pageState === "Login" && <Login loginInfo={handleLoginInfo} setPageState={setPageState}/>}
             {/* {!canLogin ? (<Login loginInfo={handleLoginInfo} setPageState={setPageState}/>) : <MainPage customerID={customerID}/>} */}
         </div>
     )

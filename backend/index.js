@@ -33,7 +33,7 @@ app.post("/CheckLoginInfo", (req, res) => {
         if (err) throw err;
         console.log(data);
         //res.json(data);
-        res.json({message: data[0].Count > 0 ? "Data Exist" : "Data doesn't Exist", customer_id: data[0].customer_id});
+        res.json({message: data[0].Count > 0 ? "Data Exist" : "Data doesn't Exist", customer_id: data[0].customer_id}); 
     }); 
 })
 
@@ -45,7 +45,7 @@ app.post("/FetchCustomerInfo", (req, res)=>{
         if(err) return res.json(err);
         res.json(data);  
     })
-})
+}) 
 
 app.put("/UpdateCustomerInfo", (req, res)=>{
     const customer_id = req.body.customer_id;
@@ -55,7 +55,7 @@ app.put("/UpdateCustomerInfo", (req, res)=>{
     const phone_number = req.body.phone_number;
     const gender = req.body.gender;
     const university =req.body.university;
-    const query = "UPDATE customers SET customer_name = ?, age = ?, email = ?, phone_number = ?, gender = ?, university = ?WHERE customer_id = ?";
+    const query = "UPDATE customers SET customer_name = ?, age = ?, email = ?, phone_number = ?, gender = ?, university = ? WHERE customer_id = ?";
 
     db.query(query, [customer_name, age, email, phone_number, gender, university, customer_id], (err)=> {
         if (err) throw err;
