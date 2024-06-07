@@ -1,8 +1,9 @@
 import {Form, Input, Checkbox, Button, Upload, Progress} from "@arco-design/web-react"
 import { IconPlus, IconEdit } from '@arco-design/web-react/icon';
  import "@arco-design/web-react/dist/css/arco.css";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { UploadItem } from "@arco-design/web-react/es/Upload";
+import axios from "axios";
 
 // interface FileObject {
 //     name: string,
@@ -12,9 +13,56 @@ import { UploadItem } from "@arco-design/web-react/es/Upload";
 //     status: string,
 //     uid: string,
 // }
-function SignUp() {
-    const [file, setFile] = useState<UploadItem>();
-    const cs = `arco-upload-list-item${file && file.status === 'error' ? ' is-error' : ''}`;
+interface SignUpProps{
+    setPageState: React.Dispatch<React.SetStateAction<string>>,
+}
+interface SignUpInfo{
+    customer_name:string,
+    customer_password:string,
+    age:number,
+    email:string,
+    phone_number:string,
+    gender:string,
+    university:string,
+}
+
+function SignUp({setPageState}:SignUpProps) {
+    // const [file, setFile] = useState<UploadItem>();
+    // const cs = `arco-upload-list-item${file && file.status === 'error' ? ' is-error' : ''}`;
+    const [signUpInfo, setSignUpInfo] = useState<SignUpInfo>(
+        {
+            customer_name:"",
+            customer_password:"",
+            age:0,
+            email:"",
+            phone_number:"",
+            gender:"",
+            university:"",
+        }
+    );
+    // useEffect(()=>{
+    //     console.log(signUpInfo);
+    // },[signUpInfo])
+    const handleInput = (targetName : string, value : string) => {
+        setSignUpInfo((prevSignUpInfo)=>({
+            ...prevSignUpInfo, 
+            [targetName]: value
+        }))
+    };
+    const CreateCustomerInfo = async () =>{
+        console.log(signUpInfo);
+        try {
+            const response = await axios.post(
+                "http://localhost:8800/CreateCustomerInfo", signUpInfo
+            );
+            console.log(response);
+            if(response.status == 200){
+                setPageState("Login");
+            }
+        } catch(err){
+            console.log("Error", err);
+        }
+    };
     return(
  
         <div className="h-full flex items-center justify-center">
@@ -23,9 +71,9 @@ function SignUp() {
             <h1 className="font-black text-4xl">Sign Up</h1>
         </div>
             <Form layout="vertical" className={`flex flex-row justify-between  h-full`}>
-                <div className={`w-[20%] h-[20%]`}>
+                {/* <div className={`w-[20%] h-[20%]`}>
                 <Form.Item>
-                {/*Add default image*/}
+                {/*Add default image*
                      <Upload
                         action='/'
                         fileList={file ? [file] : []}
@@ -45,36 +93,50 @@ function SignUp() {
                         </div>
                     </Upload>
                 </Form.Item>
-                </div>
+                </div> */}
                 <div className="w-[35%]">
                 <Form.Item label="Name" >
-                    <Input />
+                    <Input onChange={(value)=>{
+                        handleInput("customer_name", value)
+                    }}/>
                 </Form.Item>
                 <Form.Item label="Password" >
-                    <Input />
+                    <Input onChange={(value)=>{
+                        handleInput("customer_password", value)
+                    }}/>
                 </Form.Item>
                 <Form.Item label="Age" >
-                    <Input />
+                    <Input onChange={(value)=>{
+                        handleInput("age", value)
+                    }}/>
                 </Form.Item>
                 <Form.Item label="Email" >
-                    <Input />
+                    <Input onChange={(value)=>{
+                        handleInput("email", value)
+                    }}/>
                 </Form.Item>
                 </div>
                 <div className="w-[35%]">
-                <Form.Item label="Hp" >
-                    <Input />
+                <Form.Item label="Phone Number" >
+                    <Input onChange={(value)=>{
+                        handleInput("phone_number", value)
+                    }}/>
                 </Form.Item>
                 <Form.Item label="Gender" >
-                    <Input />
+                    <Input onChange={(value)=>{
+                        handleInput("gender", value)
+                    }}/>
                 </Form.Item>
                 <Form.Item label="University" >
-                    <Input />
+                    <Input onChange={(value)=>{
+                        handleInput("university", value)
+                    }}/>
                 </Form.Item>
                 </div>
                 
             </Form>
             <div className="flex justify-center w-full">
-                <Button type='primary' className={`p-6 flex items-center text-[20px]`}>Submit</Button>
+                <Button type='primary' className={`p-6 flex items-center text-[20px]`} onClick={()=>{CreateCustomerInfo()}}>Submit</Button>
             </div>
         </div>
         

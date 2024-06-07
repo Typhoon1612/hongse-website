@@ -1,8 +1,9 @@
 import {Form, Input, Checkbox, Button, Upload, Progress} from "@arco-design/web-react"
 import { IconPlus, IconEdit } from '@arco-design/web-react/icon';
  import "@arco-design/web-react/dist/css/arco.css";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { UploadItem } from "@arco-design/web-react/es/Upload";
+import axios from "axios";
 
 // interface FileObject {
 //     name: string,
@@ -12,9 +13,56 @@ import { UploadItem } from "@arco-design/web-react/es/Upload";
 //     status: string,
 //     uid: string,
 // }
-function MainPage() {
-    const [file, setFile] = useState<UploadItem>();
+interface MainPageProps {
+    customerID: Number,
+}
+
+interface CustomerInfo{
+    customer_id: Number,
+    customer_name: string,
+    age: Number,
+    email: string,
+    phone_number: string,
+    gender: string,
+    university: string,
+    created_time: string,
+}
+
+function MainPage({customerID} : MainPageProps) {
+    //const [file, setFile] = useState<UploadItem>();
     //const cs = `arco-upload-list-item${file && file.status === 'error' ? ' is-error' : ''}`;
+
+    const [customerInfo, setCustomerInfo] = useState<CustomerInfo[]>([]);
+    useEffect(()=>{
+        console.log("MainPage " + JSON.stringify(customerInfo));
+    }, [customerInfo])
+    useEffect(()=>{
+        UpdateCustomerInfo(customerInfo);
+    }, [customerInfo])
+    const FetchCustomerInfo = async (customerID : Number) =>{
+        const payload = {
+            customerID: customerID,
+        };
+        try {
+            const response = await axios.post(
+                "http://localhost:8800/FetchCustomerInfo", payload
+            );
+            //console.log(response);
+            setCustomerInfo(response.data);
+        } catch(err){
+            console.log("Error", err);
+        }
+    };
+    const UpdateCustomerInfo = async (customerInfo : CustomerInfo[]) => {
+        try {
+            const response = await axios.put("http://localhost:8800/UpdateCustomerInfo", customerInfo[0]);
+            console.log(response)
+        } catch(err){
+            console.log("Error", err)
+        } 
+    }
+    useEffect(() => {console.log("MainPage" + customerID)},[customerID]);
+    useEffect(()=>{FetchCustomerInfo(customerID)}, [customerID])
     return(
  
         <div className="h-full flex items-center justify-center">
@@ -23,9 +71,8 @@ function MainPage() {
             <h1 className="font-black text-4xl">General Information</h1>
         </div>
             <Form layout="vertical" className={`flex flex-row justify-between  h-full`}>
-                <div className={`w-[20%] h-[20%]`}>
+                {/* <div className={`w-[20%] h-[20%]`}>
                 <Form.Item>
-                {/*Add default image*/}
                      <Upload
                         action='/'
                         fileList={file ? [file] : []}
@@ -45,29 +92,42 @@ function MainPage() {
                         </div>
                     </Upload>
                 </Form.Item>
-                </div>
+                </div> */}
                 <div className="w-[35%]" >
                 <Form.Item label="Name" >
-                    <Input defaultValue="Pang Kah Poh" className={`bg-white`}/>
+                    <Input value={customerInfo[0]?.customer_name} className={`bg-white`} onChange={
+                        (value)=> {
+                            setCustomerInfo(prevCustomerInfo => prevCustomerInfo.map((customers, index)=>index === 0 ? { ...customers, customer_name: value } : customers))}} />
                 </Form.Item>
                 <Form.Item label="Age" >
-                    <Input defaultValue="18" className={`bg-white`}/>
+                    <Input value={customerInfo[0]?.age?.toString()} className={`bg-white`} onChange={
+                        (value)=> {
+                            setCustomerInfo(prevCustomerInfo => prevCustomerInfo.map((customers, index)=>index === 0 ? { ...customers, age: parseInt(value, 10) } : customers))}} />
                 </Form.Item>
                 <Form.Item label="Email" >
-                    <Input defaultValue="kp20-wp21@student.tarc.edu.my" className={`bg-white`}/>
+                    <Input value={customerInfo[0]?.email} className={`bg-white`} onChange={
+                        (value)=> {
+                            setCustomerInfo(prevCustomerInfo => prevCustomerInfo.map((customers, index)=>index === 0 ? { ...customers, email: value } : customers))}} />
                 </Form.Item>
                 </div>
                 <div className="w-[35%]">
                 <Form.Item label="Hp" >
-                    <Input defaultValue="+6012-3456789" className={`bg-white`}/>
+                    <Input value={customerInfo[0]?.phone_number} className={`bg-white`} onChange={
+                        (value)=> {
+                            setCustomerInfo(prevCustomerInfo => prevCustomerInfo.map((customers, index)=>index === 0 ? { ...customers, phone_number: value } : customers))}} />
                 </Form.Item>
                 <Form.Item label="Gender" >
-                    <Input defaultValue="Female" className={`bg-white`}/>
+                    <Input value={customerInfo[0]?.gender} className={`bg-white`} onChange={
+                        (value)=> {
+                            setCustomerInfo(prevCustomerInfo => prevCustomerInfo.map((customers, index)=>index === 0 ? { ...customers, gender: value } : customers))}} />
                 </Form.Item>
                 <Form.Item label="University" >
-                    <Input defaultValue="Tunku Abdul Rahman University of Management and Technology" className={`bg-white`}/>
+                    <Input value={customerInfo[0]?.university} className={`bg-white`} onChange={
+                        (value)=> {
+                            setCustomerInfo(prevCustomerInfo => prevCustomerInfo.map((customers, index)=>index === 0 ? { ...customers, university: value } : customers))}} />
                 </Form.Item>
-                </div>          
+                </div>      
+                {/* <Button onClick={()=> UpdateCustomerInfo(customerInfo)}>Update</Button>     */}
             </Form>
         </div>
         
