@@ -11,17 +11,9 @@ const db = mysql.createConnection({
     database:"honsge_database"
 })
 
-// app.get("/", (req,res)=>{
-//     res.json("Hello this is backend!")
-// })
-
 app.use(express.json());
 
 app.use(cors());
-
-//const mysql = require('mysql2/promise');
-
-// const bcrypt = require('bcrypt');
 
 app.post("/CheckLoginInfo", (req, res) => {
     const phoneNumber = req.body.phoneNumber;
@@ -32,7 +24,6 @@ app.post("/CheckLoginInfo", (req, res) => {
     db.query(query, [phoneNumber, password], (err, data) => {
         if (err) throw err;
         console.log(data);
-        //res.json(data);
         res.json({message: data[0].Count > 0 ? "Data Exist" : "Data doesn't Exist", customer_id: data[0].customer_id}); 
     }); 
 })
@@ -55,19 +46,38 @@ app.put("/UpdateCustomerInfo", (req, res)=>{
     const phone_number = req.body.phone_number;
     const gender = req.body.gender;
     const university =req.body.university;
-    const query = "UPDATE customers SET customer_name = ?, age = ?, email = ?, phone_number = ?, gender = ?, university = ? WHERE customer_id = ?";
+    const updateCustomersQuery = `
+        UPDATE customers 
+        SET customer_name = ?, 
+            age = ?, 
+            email = ?, 
+            phone_number = ?, 
+            gender = ?, 
+            university = ?
+        WHERE customer_id = ?
+    `;
 
-    db.query(query, [customer_name, age, email, phone_number, gender, university, customer_id], (err)=> {
-        if (err) throw err;
-        res.json(
-            {message: "Successfully Update"}
-        )
+    const updateLoginInfoQuery = `
+        UPDATE login_info 
+        SET phone_number = ?
+        WHERE customer_id = ?
+    `;
+
+    db.query(updateCustomersQuery, [customer_name, age, email, phone_number, gender, university, customer_id], (err, data) => {
+        if (err) return res.json(err);
+
+        db.query(updateLoginInfoQuery, [phone_number, customer_id], (err, data) => {
+            if (err) return res.json(err);
+            return res.json("Customer updated successfully");
+        });
     });
 })
 
 app.post("/CreateCustomerInfo", (req, res) => {
     //let customerID = 0;
     const { customer_name, customer_password, age, email, phone_number, gender, university } = req.body;
+
+    db.query
 
     // Insert into customers table
     db.query(
@@ -97,21 +107,13 @@ app.post("/CreateCustomerInfo", (req, res) => {
     );
 });
 
-
-// app.post("/CreateLoginInfo", CreateLoginInfo =(phone_number, customer_password, customer_id)=>{
-//     const query = "INSERT INTO login_info(phone_number, customer_password, customer_id, created_time) VALUES (?, ?, ?, NOW());"
-//     db.query(query, [phone_number, customer_password, customer_id], (err)=> {
-//         if (err) throw err;
-//         res.json(
-//             {message: "Successfully Create"}
-//         )
-//     });
-// })
-
-app.get("/", (req, res)=>{
-    const query = "SELECT * FROM login_info"
-    db.query(query,(err, data)=>{
+app.get("/FetchPoints", (req, res)=>{
+    const query = "SELECT * FROM points WHERE customer_id = ?"
+    const customer_id = req.query.customerID;
+    console.log(req.body.customerID);
+    db.query(query, [customer_id], (err, data)=>{
         if(err) return res.json(err)
+        console.log(data);
         return res.json(data)  
     })
 })

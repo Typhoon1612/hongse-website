@@ -1,20 +1,13 @@
-import {Form, Input, Checkbox, Button, Upload, Progress} from "@arco-design/web-react"
-import { IconPlus, IconEdit } from '@arco-design/web-react/icon';
- import "@arco-design/web-react/dist/css/arco.css";
+import {Form, Input, Button, Drawer} from "@arco-design/web-react"
+import "@arco-design/web-react/dist/css/arco.css";
 import React, { useEffect, useState } from "react";
-import { UploadItem } from "@arco-design/web-react/es/Upload";
 import axios from "axios";
+import Navbar from "../navbar";
 
-// interface FileObject {
-//     name: string,
-//     size: number,
-//     type: string,
-//     url: string,
-//     status: string,
-//     uid: string,
-// }
 interface MainPageProps {
     customerID: Number,
+    setPageState: React.Dispatch<React.SetStateAction<string>>
+,
 }
 
 interface CustomerInfo{
@@ -28,17 +21,22 @@ interface CustomerInfo{
     created_time: string,
 }
 
-function MainPage({customerID} : MainPageProps) {
-    //const [file, setFile] = useState<UploadItem>();
-    //const cs = `arco-upload-list-item${file && file.status === 'error' ? ' is-error' : ''}`;
-
+function MainPage({customerID, setPageState} : MainPageProps) {
+    //USESTATE
     const [customerInfo, setCustomerInfo] = useState<CustomerInfo[]>([]);
+
+    //USEEFFECT
     useEffect(()=>{
         console.log("MainPage " + JSON.stringify(customerInfo));
+        console.log(customerID);
     }, [customerInfo])
     useEffect(()=>{
         UpdateCustomerInfo(customerInfo);
     }, [customerInfo])
+    useEffect(() => {console.log("MainPage" + customerID)},[customerID]);
+    useEffect(()=>{FetchCustomerInfo(customerID)}, [customerID])
+
+    //AXIOS BACKEND
     const FetchCustomerInfo = async (customerID : Number) =>{
         const payload = {
             customerID: customerID,
@@ -47,7 +45,7 @@ function MainPage({customerID} : MainPageProps) {
             const response = await axios.post(
                 "http://localhost:8800/FetchCustomerInfo", payload
             );
-            //console.log(response);
+            console.log(response);
             setCustomerInfo(response.data);
         } catch(err){
             console.log("Error", err);
@@ -61,10 +59,12 @@ function MainPage({customerID} : MainPageProps) {
             console.log("Error", err)
         } 
     }
-    useEffect(() => {console.log("MainPage" + customerID)},[customerID]);
-    useEffect(()=>{FetchCustomerInfo(customerID)}, [customerID])
+    
     return(
- 
+        <>
+        {/*Navbar*/}
+        <Navbar setPageState={setPageState}/> 
+        {/*Content*/}
         <div className="h-full flex items-center justify-center">
         <div className="flex w-[80%] px-20 h-[90%] py-12 flex-col shadow-2xl">
         <div className="flex justify-center pb-20 pt-5">
@@ -73,7 +73,7 @@ function MainPage({customerID} : MainPageProps) {
             <Form layout="vertical" className={`flex flex-row justify-between  h-full`}>
                 {/* <div className={`w-[20%] h-[20%]`}>
                 <Form.Item>
-                     <Upload
+                    <Upload
                         action='/'
                         fileList={file ? [file] : []}
                         showUploadList={false}
@@ -130,8 +130,9 @@ function MainPage({customerID} : MainPageProps) {
                 {/* <Button onClick={()=> UpdateCustomerInfo(customerInfo)}>Update</Button>     */}
             </Form>
         </div>
-        
-        </div>
+            
+            </div>
+        </>
     )
 }
 
